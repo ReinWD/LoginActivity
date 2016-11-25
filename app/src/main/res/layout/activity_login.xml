@@ -90,6 +90,15 @@
                 android:layout_gravity="end"
                 android:layout_marginBottom="10dp">
 
+                <RadioButton
+                    android:text="记住密码"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/remember_password"
+                    android:layout_weight="1"
+                    android:textColor="@android:color/holo_green_light"
+                    android:checked="false"/>
+
                 <Button
                     android:text="忘记密码"
                     android:layout_width="wrap_content"

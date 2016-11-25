@@ -10,8 +10,10 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.RadioButton;
 import android.widget.Toast;
 
 import com.jay.loginactivitytest.R;
@@ -19,10 +21,13 @@ import com.jay.loginactivitytest.data.User;
 import com.jay.loginactivitytest.data.UserManager;
 
 public class LoginActivity extends AppCompatActivity {
+    private static final String REMEMBERED = "remembered";
+
     private EditText mEdtPhone, mEdtPassword;
     private Button mBtnForget, mBtnLogin;
     private Button mBtnRegister;
     private ImageButton mImgBtnBack;
+    private RadioButton mRadioButton;
 
     private UserManager mUserManager;
 
@@ -33,12 +38,12 @@ public class LoginActivity extends AppCompatActivity {
 
         mUserManager = new UserManager(this);
 
-        SharedPreferences preferences = getSharedPreferences("count", MODE_PRIVATE);
+        SharedPreferences preferences = getSharedPreferences("option", MODE_PRIVATE);
         int count = preferences.getInt("count", 0);
         //创建数据文件并存储一个空账户
         if (count == 0) mUserManager.addUser(new User(".", "."));
         //存储程序使用次数
-        SharedPreferences.Editor editor = preferences.edit();
+        final SharedPreferences.Editor editor = preferences.edit();
         editor.putInt("count", ++count);
         editor.apply();
 
@@ -48,7 +53,24 @@ public class LoginActivity extends AppCompatActivity {
         mBtnLogin = (Button) findViewById(R.id.btn_login);
         mBtnRegister = (Button) findViewById(R.id.btn_register);
         mImgBtnBack = (ImageButton) findViewById(R.id.imgBtn_back);
+        mRadioButton = (RadioButton) findViewById(R.id.remember_password);
 
+        //记住密码
+        if (preferences.getBoolean(REMEMBERED, false)) {
+            mRadioButton.setChecked(true);
+            mEdtPhone.setText(preferences.getString("phone",""));
+            mEdtPassword.setText(preferences.getString("password",""));
+        }
+
+        mRadioButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                editor.putBoolean(REMEMBERED, isChecked);
+                editor.apply();
+            }
+        });
+
+        //密码找回
         mBtnForget.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -75,6 +97,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        //登录
         mBtnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -93,6 +116,9 @@ public class LoginActivity extends AppCompatActivity {
                 //检查密码是否输入正确
                 String password = mEdtPassword.getText().toString();
                 if (password.equals(user.getPassword())) {
+                    editor.putString("phone", phone);
+                    editor.putString("password", password);
+                    editor.apply();
                     Intent intent = new Intent(LoginActivity.this, MakeTroubleActivity.class);
                     startActivity(intent);
                     finish();
@@ -100,6 +126,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        //注册
         mBtnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -108,6 +135,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        //返回
         mImgBtnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
